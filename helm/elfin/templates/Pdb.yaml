@@ -1,0 +1,11 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: elfin-pdb
+  labels:
+    app: elfin-app
+spec:
+  selector:
+    matchLabels:
+      app: elfin-app

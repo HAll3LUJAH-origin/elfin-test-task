@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elfin
+  labels:
+    app: elfin-app
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: elfin-app
+  template:
+    metadata:
+      labels:
+        app: elfin-app
+    spec:
+      containers:
+        - name: elfin
+          image: "{{ .Values.repository | default "hall3lujah/elfin"}}:{{ .Values.tag | default "5e55e8e535f382b776b7d5dc05df08d014a9a352"}}"
+          imagePullPolicy: {{ .Values.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 200m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}

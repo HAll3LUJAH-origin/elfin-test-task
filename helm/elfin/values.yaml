@@ -1,0 +1,9 @@
+---
+replicaCount: 1
+image:
+  repository: hall3lujah/elfin
+  tag: 5e55e8e535f382b776b7d5dc05df08d014a9a352
+pullPolicy: IfNotPresent
+host: dev.elfin.tech
+service:
+  port: 8000

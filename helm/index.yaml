@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  elfin:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2024-03-11T00:51:06.154671+03:00"
+    description: helm chart
+    digest: b6756d3b99021112952dd819933575391fc919eb96cd88ae87eaaabd6e33845a
+    icon: https://helm.sh/img/helm.svg
+    name: elfin
+    type: application
+    urls:
+    - elfin-1.0.tgz
+    version: "1.0"
+generated: "2024-03-11T00:51:06.153716+03:00"
