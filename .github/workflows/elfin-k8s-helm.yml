@@ -1,0 +1,68 @@
+name: Elfin-K8s-Helm
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Select version
+        default: 1.3.0
+      action:
+        default: upgrade -i
+        description: upgrade -i, upgrade, install, uninstall, upgrade --install
+        required: false
+      chart-dir:
+        default: helm
+        description: Relative path from the repository root directory
+        required: false
+      namespace:
+        default: elfin
+        required: false
+      release-name:
+        default: elfin
+        required: false
+     
+jobs:
+  push:
+    name: Push chart
+    runs-on: ubuntu-latest
+    steps:  
+       - name: Git Checkout
+         uses: actions/checkout@master
+       - name: Setup Helm
+         uses: azure/setup-helm@v4.1.0
+         with:
+           version: 3.14.2
+         id: install         
+       - name: Chart | Push
+         uses: appany/helm-oci-chart-releaser@v0.3.0
+         with:
+            name: elfin
+            repository: hall3lujah
+            tag: ${{ inputs.version }}
+            path: helm/elfin
+            registry: docker.io
+            registry_username: ${{ secrets.DOCKERHUB_USERNAME }}
+            registry_password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  deploy:
+    name: Deploy
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure kubeconfig
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Setup client-keystone-auth plugin
+        run: |
+          curl -sSL https://hub.mcs.mail.ru/repository/client-keystone-auth/latest/linux/client-install.sh | bash
+          echo "$HOME/vk-cloud-solutions/bin" >> $GITHUB_PATH
+          source ~/.bashrc
+      - name: Git Checkout
+        uses: actions/checkout@master
+  
+      - name: Deploy with Helm
+        run: |
+          helm --debug ${{ inputs.action }} ${{ inputs.release-name }} ${{ secrets.HELM_INSTANCE }} --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_TOKEN }} --version ${{ inputs.version }} --namespace ${{ inputs.namespace }} --atomic --wait
+        shell: bash
